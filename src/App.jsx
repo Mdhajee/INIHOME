@@ -24,6 +24,11 @@ import {
 
 import House3D from "./components/House3D";
 import FloorPlan2D from "./components/FloorPlan2D";
+import { validateHouse } from "./validation/houseValidator.js";
+
+import {
+  calculateBuildingMeasurements,
+} from "./validation/measurementCalculator.js";
 
 import "./App.css";
 
@@ -132,6 +137,12 @@ function App() {
   const [showLayersMenu, setShowLayersMenu] = useState(false);
 
   const [selectedRoom, setSelectedRoom] = useState("Living Room");
+
+  // MEMBER 2: ARCHITECTURAL VALIDATION
+  const validationResult = validateHouse(houseData);
+
+  // MEMBER 2: BUILDING MEASUREMENTS
+  const measurementReport = calculateBuildingMeasurements(houseData);
 
   // CHECK WHETHER UNDO / REDO IS AVAILABLE
   const canUndo = history.past.length > 0;
@@ -817,6 +828,87 @@ function App() {
               </>
             )}
 
+          </div>
+
+          {/* MEMBER 2: ARCHITECTURAL VALIDATION */}
+
+          <div className="property-section">
+            <h4>ARCHITECTURAL VALIDATION</h4>
+
+            <p
+              style={{
+                color: validationResult.valid ? "#15803d" : "#dc2626",
+                fontWeight: 700,
+              }}
+            >
+              Status: {validationResult.valid ? "Valid Design" : "Invalid Design"}
+            </p>
+
+            <p>Checks performed: {validationResult.summary.totalChecks}</p>
+
+            <p>Passed: {validationResult.summary.passed}</p>
+
+            <p>Failed: {validationResult.summary.failed}</p>
+
+            {validationResult.errors.map((error, index) => (
+              <p
+                key={`error-${index}`}
+                style={{ color: "#dc2626", fontSize: "12px" }}
+              >
+                {error.element}: {error.message}
+              </p>
+            ))}
+
+            {validationResult.warnings.map((warning, index) => (
+              <p
+                key={`warning-${index}`}
+                style={{ color: "#d97706", fontSize: "12px" }}
+              >
+                Warning: {warning}
+              </p>
+            ))}
+          </div>
+
+          {/* MEMBER 2: BUILDING MEASUREMENTS */}
+
+          <div className="property-section">
+            <h4>BUILDING MEASUREMENTS</h4>
+
+            <p>
+              Floor Area: {measurementReport.building.floorArea} m²
+            </p>
+
+            <p>
+              Building Volume: {measurementReport.building.volume} m³
+            </p>
+
+            <p>
+              Total Room Area: {measurementReport.summary.totalRoomArea} m²
+            </p>
+
+            <p>
+              Unallocated Area: {measurementReport.summary.unallocatedArea} m²
+            </p>
+
+            <p>
+              Room Coverage: {measurementReport.summary.roomCoveragePercentage}%
+            </p>
+
+            <p>
+              Gross Wall Area: {measurementReport.summary.grossExternalWallArea} m²
+            </p>
+
+            <p>
+              Net Wall Area: {measurementReport.summary.netExternalWallArea} m²
+            </p>
+
+            <h4 style={{ marginTop: "15px" }}>ROOM AREAS</h4>
+
+            {measurementReport.rooms.map((room) => (
+              <p key={room.id}>
+                {room.name}: {room.area} m²
+              </p>
+            ))}
           </div>
 
           {/* OTHER SETTINGS */}
